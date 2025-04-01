@@ -1,0 +1,37 @@
+services:
+  migration:
+      build: .
+      command: [ "alembic", "upgrade", "head" ]
+      container_name: twin-call-statistic-migration
+      environment:
+        database: $database
+        database_schema: $database_schema
+      networks:
+        - postgres_default
+
+  twin_call_statistic:
+    build: .
+    restart: "always"
+    depends_on:
+      - migration
+    command: ["python", "-m", "twin_call_statistic"]
+    ports:
+      - "9888:8000"
+    volumes:
+      - ./:/usr/src/
+    environment:
+      database: $database
+      database_schema: $database_schema
+      debug_enabled: $debug_enabled
+      interface_opened: $interface_opened
+      twin_auth_url: $twin_auth_url
+      twin_contacts_url: $twin_contacts_url
+      twin_login: $twin_login
+      twin_password: $twin_password
+      date_start: $date_start
+    networks:
+      - postgres_default
+
+networks:
+  postgres_default:
+    external: true

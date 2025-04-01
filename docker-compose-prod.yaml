@@ -1,0 +1,41 @@
+services:
+  migration:
+      build: .
+      command: [ "alembic", "upgrade", "head" ]
+      container_name: twin-call-statistic-migration
+      environment:
+        database: $database
+        database_schema: $database_schema
+
+  http:
+    build: .
+    depends_on:
+      - migration
+    command: ["python", "-m", "twin_call_statistic"]
+    expose:
+      - "8000"
+    volumes:
+      - ./twin_call_statistic:/usr/src/twin_call_statistic
+    environment:
+      database: $database
+      database_schema: $database_schema
+      debug_enabled: $debug_enabled
+      interface_opened: $interface_opened
+      twin_auth_url: $twin_auth_url
+      twin_contacts_url: $twin_contacts_url
+      date_start: $date_start
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_reverse-proxy"
+      - "traefik.http.middlewares.twin_call_statistic-prefix.stripprefix.prefixes=$https_prefix"
+      - "traefik.http.middlewares.twin_call_statistic-prefix.stripprefix.forceSlash=false"
+      - "traefik.http.routers.twin_call_statistic.tls=true"
+      - "traefik.http.routers.twin_call_statistic.rule=Host(`$host`) && PathPrefix(`$https_prefix`)"
+      - "traefik.http.routers.twin_call_statistic.middlewares=twin_call_statistic-prefix"
+    networks:
+      - traefik_reverse-proxy
+    restart: always
+
+networks:
+  traefik_reverse-proxy:
+    external: true
