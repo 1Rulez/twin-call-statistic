@@ -50,7 +50,7 @@ async def save_contacts(
     contacts_model = [ContactSchema(**contact) for contact in contacts.get("items")]
 
     contacts_db_dicts = [
-        data_call.model_dump() for data_call in contacts_model
+        data_call.model_dump(exclude={'variablesString'}) for data_call in contacts_model
         if data_call.currentStatusName not in ["INPROGRESS", "DIAL"]
     ]
 

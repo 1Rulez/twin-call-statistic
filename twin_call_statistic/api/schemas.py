@@ -26,12 +26,43 @@ class ContactSchema(BaseModel):
     autoCallCandidateId: str | None
     dialogResult: str | None
     resultsString: dict | str | None
+    variablesString: dict | str | None
 
     @model_validator(mode="before")
     @classmethod
     def validate_result(cls, values):
 
         results = values.get("resultsString")
+        variables = values.get("variablesString")
+
+        if isinstance(variables, str):
+            try:
+                variables_dict = json.loads(variables) if variables else None
+            except json.JSONDecodeError:
+                variables_dict = None
+        else:
+            variables_dict = results
+
+        redash_variables = {}
+        redash_results = {}
+
+        if isinstance(variables_dict, dict):
+            for variable in variables_dict:
+                if "redash_variable" in variable:
+                    redash_variables.update({variable: variables_dict[variable]})
+                if len(redash_variables) == 5:
+                    break
+
+            for result in variables_dict:
+                if "redash_result" in result:
+                    redash_results.update({result: variables_dict[result]})
+                if len(redash_results) == 5:
+                    break
+
+        if redash_variables:
+            values["redash_variable"] = redash_variables
+        if redash_results:
+            values["redash_result"] = redash_results
 
         if isinstance(results, str):
             try:

@@ -29,8 +29,10 @@ class CallInfo(Base):
     confirmation: Mapped[str] = mapped_column(String(225), nullable=True)
     evaluation: Mapped[str] = mapped_column(String(225), nullable=True)
     autoCallCandidateId: Mapped[str] = mapped_column(String(225), nullable=True)
-    dialogResult: Mapped[JSON] = mapped_column(JSON, nullable=True)
+    dialogResult: Mapped[str] = mapped_column(String(500), nullable=True)
     resultsString: Mapped[JSON] = mapped_column(JSON, nullable=True)
+    redash_variable: Mapped[JSON] = mapped_column(JSON, nullable=True)
+    redash_result: Mapped[JSON] = mapped_column(JSON, nullable=True)
     project: Mapped[str] = mapped_column(String(225), nullable=False)
 
     __table_args__ = (
