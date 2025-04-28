@@ -27,6 +27,8 @@ class ContactSchema(BaseModel):
     dialogResult: str | None
     resultsString: dict | str | None
     variablesString: dict | str | None
+    redash_variable: dict | str | None = None
+    redash_result: dict | str | None = None
 
     @model_validator(mode="before")
     @classmethod
