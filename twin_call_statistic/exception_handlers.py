@@ -5,8 +5,10 @@ from fastapi.exceptions import RequestValidationError
 
 logger = logging.getLogger("uvicorn")
 
+
 class NotAccountException(Exception):
     pass
+
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     request.app.container.logger.error(exc.errors())

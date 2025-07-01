@@ -1,3 +1,4 @@
+from typing import Sequence
 from datetime import timedelta
 
 from sqlalchemy import select, desc, insert
@@ -9,7 +10,7 @@ from twin_call_statistic.models import TwinProjects, CallInfo
 from twin_call_statistic.api.schemas import ContactSchema
 
 
-async def get_twin_accounts(session: AsyncSession) -> list[TwinProjects]:
+async def get_twin_accounts(session: AsyncSession) -> Sequence[TwinProjects]:
     query = select(TwinProjects).where(TwinProjects.is_active.is_(True))
     return (await session.execute(query)).scalars().all()
 
@@ -30,18 +31,15 @@ async def get_from_date(session: AsyncSession, project: str) -> str | None:
 
 
 async def save_contacts(
-        twin: TwinRepository,
-        token: str,
-        project: str,
-        session: AsyncSession,
-        limit: int = 1000,
-        page: int = 0,
-        from_: str = None
+    twin: TwinRepository,
+    token: str,
+    project: str,
+    session: AsyncSession,
+    limit: int = 1000,
+    page: int = 0,
+    from_: str = None,
 ) -> dict | None:
-    params = {
-        "limit": limit,
-        "page": page
-    }
+    params = {"limit": limit, "page": page, "fields": "marker"}
     if from_:
         params["from"] = from_
     contacts = await twin.get_call_data(token, params=params)
@@ -50,15 +48,16 @@ async def save_contacts(
     contacts_model = [ContactSchema(**contact) for contact in contacts.get("items")]
 
     contacts_db_dicts = [
-        data_call.model_dump(exclude={'variablesString'}) for data_call in contacts_model
+        data_call.model_dump(exclude={"variablesString"})
+        for data_call in contacts_model
         if data_call.currentStatusName not in ["INPROGRESS", "DIAL"]
     ]
 
     for contact_dict in contacts_db_dicts:
-        contact_dict['project'] = project
+        contact_dict["project"] = project
 
     stmt = insert(CallInfo).values(contacts_db_dicts)
-    stmt = stmt.on_conflict_do_nothing(index_elements=['id'])
+    stmt = stmt.on_conflict_do_nothing(index_elements=["id"])
     await session.execute(stmt)
     if int(contacts.get("count")) / 1000 > page + 1:
         return await save_contacts(
@@ -68,5 +67,5 @@ async def save_contacts(
             session=session,
             limit=limit,
             page=page + 1,
-            from_=from_
+            from_=from_,
         )

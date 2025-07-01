@@ -15,7 +15,7 @@ def create_application():
     """Инициализация приложения"""
     settings = Settings()
     interface_location = "/interface" if settings.interface_opened else None
-    docs_location = '/docs' if settings.interface_opened else None
+    docs_location = "/docs" if settings.interface_opened else None
     application = Application(
         debug=settings.debug_enabled,
         title="Сбор статистики с TWIN",

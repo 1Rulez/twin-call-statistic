@@ -84,5 +84,3 @@ class ContactSchema(BaseModel):
             values["status"] = values["confirmation"] = None
             values["resultsString"] = values["evaluation"] = None
         return values
-
-

@@ -9,4 +9,4 @@ class Settings(BaseSettings):
     interface_opened: bool
     twin_auth_url: str
     twin_contacts_url: str
-    date_start: str = '2025-02-24'
+    date_start: str = "2025-02-24"

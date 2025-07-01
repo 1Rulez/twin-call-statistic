@@ -21,9 +21,15 @@ class CallInfo(Base):
     robotCallDuration: Mapped[int] = mapped_column(Integer, nullable=True)
     companyId: Mapped[int] = mapped_column(Integer, nullable=True)
     isIncoming: Mapped[bool] = mapped_column(Boolean, nullable=True)
-    createdAt: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False, index=True)
-    startedAt: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=True, index=True)
-    finishedAt: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=True, index=True)
+    createdAt: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, index=True
+    )
+    startedAt: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, index=True
+    )
+    finishedAt: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, index=True
+    )
     status: Mapped[str] = mapped_column(String(225), nullable=True)
     currentStatusName: Mapped[str] = mapped_column(String(225), nullable=True)
     confirmation: Mapped[str] = mapped_column(String(225), nullable=True)
@@ -35,9 +41,7 @@ class CallInfo(Base):
     redash_result: Mapped[JSON] = mapped_column(JSON, nullable=True)
     project: Mapped[str] = mapped_column(String(225), nullable=False)
 
-    __table_args__ = (
-        ForeignKeyConstraint(["project"], ["twin_projects.twin_login"]),
-    )
+    __table_args__ = (ForeignKeyConstraint(["project"], ["twin_projects.twin_login"]),)
 
 
 class TwinProjects(Base):
