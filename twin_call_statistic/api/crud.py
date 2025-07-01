@@ -39,12 +39,16 @@ async def save_contacts(
     page: int = 0,
     from_: str = None,
 ) -> dict | None:
-    params = {"limit": limit, "page": page, "fields": "marker"}
+    params = {"limit": limit, "page": page}
+
     if from_:
         params["from"] = from_
+
     contacts = await twin.get_call_data(token, params=params)
+
     if not contacts.get("items"):
         return None
+
     contacts_model = [ContactSchema(**contact) for contact in contacts.get("items")]
 
     contacts_db_dicts = [

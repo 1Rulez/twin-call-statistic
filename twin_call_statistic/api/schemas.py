@@ -26,6 +26,7 @@ class ContactSchema(BaseModel):
     autoCallCandidateId: str | None
     dialogResult: str | None
     resultsString: dict | str | None
+    markersString: str | None
     variablesString: dict | str | None
     redash_variable: dict | str | None = None
     redash_result: dict | str | None = None
