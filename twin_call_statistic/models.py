@@ -40,7 +40,7 @@ class CallInfo(Base):
     redash_variable: Mapped[JSON] = mapped_column(JSON, nullable=True)
     redash_result: Mapped[JSON] = mapped_column(JSON, nullable=True)
     project: Mapped[str] = mapped_column(String(225), nullable=False)
-    markersString: Mapped[str] = mapped_column(String(225), nullable=True)
+    markersString: Mapped[str] = mapped_column(String(500), nullable=True)
 
     __table_args__ = (ForeignKeyConstraint(["project"], ["twin_projects.twin_login"]),)
 
