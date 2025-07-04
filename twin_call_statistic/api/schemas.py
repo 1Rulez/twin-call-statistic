@@ -9,25 +9,25 @@ class ContactSchema(BaseModel):
 
     id: UUID
     botId: UUID
-    timezone: int | None
-    nps: str | None
-    duration: int | None
-    mainCallDuration: int | None
-    robotCallDuration: int | None
-    companyId: int | None
-    isIncoming: bool | None
+    timezone: int | None = None
+    nps: str | None = None
+    duration: int | None = None
+    mainCallDuration: int | None = None
+    robotCallDuration: int | None = None
+    companyId: int | None = None
+    isIncoming: bool | None = None
     createdAt: datetime
-    startedAt: datetime | None
-    finishedAt: datetime | None
-    status: str | None
-    confirmation: str | None
-    evaluation: str | None
-    currentStatusName: str | None
-    autoCallCandidateId: str | None
-    dialogResult: str | None
-    resultsString: dict | str | None
-    markersString: str | None
-    variablesString: dict | str | None
+    startedAt: datetime | None = None
+    finishedAt: datetime | None = None
+    status: str | None = None
+    confirmation: str | None = None
+    evaluation: str | None = None
+    currentStatusName: str | None = None
+    autoCallCandidateId: str | None = None
+    dialogResult: str | None = None
+    resultsString: dict | str | None = None
+    markersString: str | None = None
+    variablesString: dict | str | None = None
     redash_variable: dict | str | None = None
     redash_result: dict | str | None = None
 

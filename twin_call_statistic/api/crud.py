@@ -38,11 +38,15 @@ async def save_contacts(
     limit: int = 1000,
     page: int = 0,
     from_: str = None,
+    fields_: dict = None,
 ) -> dict | None:
     params = {"limit": limit, "page": page}
 
     if from_:
         params["from"] = from_
+
+    if fields_:
+        params["fields"] = ", ".join(i for i in fields_ if fields_[i] is True)
 
     contacts = await twin.get_call_data(token, params=params)
 
@@ -72,4 +76,5 @@ async def save_contacts(
             limit=limit,
             page=page + 1,
             from_=from_,
+            fields_=fields_
         )

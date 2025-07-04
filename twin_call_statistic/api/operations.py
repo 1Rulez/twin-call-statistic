@@ -32,18 +32,21 @@ async def receive_contacts_info(request: Request):
                 status_code=404, detail="Список аккаунтов для сбора пуст"
             )
 
-        accounts = [
-            {"login": acc.twin_login, "pass": acc.twin_password} for acc in accounts
-        ]
         for account in accounts:
-            login, password = account["login"], account["pass"]
-            twin = await get_twin_repo(request, login, password)
+            twin = await get_twin_repo(
+                request, account.twin_login, account.twin_password
+            )
             token = await twin.get_auth_token()
-            from_date = await get_from_date(session, login)
+            from_date = await get_from_date(session, account.twin_login)
             from_date = (
                 from_date if from_date else request.app.container.settings.date_start
             )
             await save_contacts(
-                twin=twin, token=token, project=login, session=session, from_=from_date
+                twin=twin,
+                token=token,
+                project=account.twin_login,
+                session=session,
+                from_=from_date,
+                fields_=account.fields
             )
             await session.commit()
