@@ -33,7 +33,7 @@ async def receive_contacts_info(request: Request):
             )
 
         accounts = [
-            {"login": acc.twin_login, "pass": acc.twin_password, "field": acc.fields}
+            {"login": acc.twin_login, "pass": acc.twin_password, "fields": acc.fields}
             for acc in accounts
         ]
         for account in accounts:
