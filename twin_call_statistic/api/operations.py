@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from twin_call_statistic.adapters.twin import TwinRepository
+from twin_call_statistic.api.schemas import AccountsSchema
 from twin_call_statistic.configuration import Request
 from twin_call_statistic.api.crud import get_twin_accounts, get_from_date, save_contacts
 
@@ -26,36 +27,25 @@ async def receive_contacts_info(request: Request):
     async with get_session(request) as session:
         accounts = await get_twin_accounts(session)
 
-        request.app.container.logger.info(f"accounts {accounts}")
         if not accounts:
             raise HTTPException(
                 status_code=404, detail="Список аккаунтов для сбора пуст"
             )
 
-        accounts = [
-            {"login": acc.twin_login, "pass": acc.twin_password, "fields": acc.fields}
-            for acc in accounts
-        ]
+        accounts = [AccountsSchema(**acc) for acc in accounts]
+
         for account in accounts:
-            login, password, fields = (
-                account["login"],
-                account["pass"],
-                account["fields"],
-            )
-            twin = await get_twin_repo(
-                request, login, password
-            )
+            twin = await get_twin_repo(request, account.twin_login, account.twin_password)
             token = await twin.get_auth_token()
-            from_date = await get_from_date(session, login)
-            from_date = (
-                from_date if from_date else request.app.container.settings.date_start
-            )
+            from_date = await get_from_date(session, account.twin_login)
+            if not from_date:
+                from_date = account.date_start.strftime("%Y-%m-%dT%H:00:00+00:00")
             await save_contacts(
                 twin=twin,
                 token=token,
-                project=login,
+                project=account.twin_login,
                 session=session,
                 from_=from_date,
-                fields_=fields,
+                fields_=account.fields,
             )
             await session.commit()

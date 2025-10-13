@@ -1,7 +1,7 @@
 from typing import Sequence
-from datetime import timedelta
+from datetime import datetime, timedelta
 
-from sqlalchemy import select, desc, insert
+from sqlalchemy import select, desc, insert, RowMapping
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,9 +10,17 @@ from twin_call_statistic.models import TwinProjects, CallInfo
 from twin_call_statistic.api.schemas import ContactSchema
 
 
-async def get_twin_accounts(session: AsyncSession) -> Sequence[TwinProjects]:
-    query = select(TwinProjects).where(TwinProjects.is_active.is_(True))
-    return (await session.execute(query)).scalars().all()
+async def get_twin_accounts(session: AsyncSession) -> Sequence[RowMapping]:
+    stmt = (
+        select(
+            TwinProjects.twin_login,
+            TwinProjects.twin_password,
+            TwinProjects.fields,
+            TwinProjects.date_start,
+        )
+        .where(TwinProjects.is_active.is_(True))
+    )
+    return (await session.execute(stmt)).mappings().all()
 
 
 async def get_from_date(session: AsyncSession, project: str) -> str | None:
@@ -25,8 +33,7 @@ async def get_from_date(session: AsyncSession, project: str) -> str | None:
     result = await session.execute(stmt)
     date = result.scalars().first()
     if date:
-        # -3 часа от мск, в utc, и -1 час для сбора за прошлый час
-        dt_str = date.replace(minute=0, second=0) - timedelta(hours=4)
+        dt_str = date.replace(minute=0, second=0)
         return dt_str.strftime("%Y-%m-%dT%H:%M:%S+00:00")
 
 
@@ -44,6 +51,10 @@ async def save_contacts(
 
     if from_:
         params["from"] = from_
+
+    to = datetime.now().replace(minute=0, second=0) - timedelta(hours=1)
+
+    params["to"] = to.strftime("%Y-%m-%dT%H:%M:%S+00:00")
 
     if fields_:
         params["fields"] = ", ".join(i for i in fields_ if fields_[i] is True)
@@ -76,5 +87,5 @@ async def save_contacts(
             limit=limit,
             page=page + 1,
             from_=from_,
-            fields_=fields_
+            fields_=fields_,
         )

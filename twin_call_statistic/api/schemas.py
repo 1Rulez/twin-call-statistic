@@ -1,6 +1,7 @@
 import json
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, date
+from typing import Any, Dict
 
 from pydantic import BaseModel, model_validator
 
@@ -85,3 +86,10 @@ class ContactSchema(BaseModel):
             values["status"] = values["confirmation"] = None
             values["resultsString"] = values["evaluation"] = None
         return values
+
+
+class AccountsSchema(BaseModel):
+    twin_login: str
+    twin_password: str
+    fields: Dict[str, Any] | None
+    date_start: date

@@ -1,7 +1,7 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import Dict, Any
 from uuid import UUID
-from sqlalchemy import String, TIMESTAMP, Boolean, Integer, ForeignKeyConstraint, JSON
+from sqlalchemy import String, TIMESTAMP, Boolean, Integer, ForeignKeyConstraint, JSON, DATE
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -54,3 +54,4 @@ class TwinProjects(Base):
     twin_password: Mapped[str] = mapped_column(String(225))
     is_active: Mapped[bool] = mapped_column(Boolean)
     fields: Mapped[Dict[str, Any]] = mapped_column(JSON, nullable=True)
+    date_start: Mapped[date] = mapped_column(DATE, nullable=False)
