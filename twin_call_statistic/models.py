@@ -55,3 +55,4 @@ class TwinProjects(Base):
     is_active: Mapped[bool] = mapped_column(Boolean)
     fields: Mapped[Dict[str, Any]] = mapped_column(JSON, nullable=True)
     date_start: Mapped[date] = mapped_column(DATE, nullable=False)
+    bot_id: Mapped[UUID] = mapped_column(nullable=True)

@@ -39,7 +39,8 @@ async def receive_contacts_info(request: Request):
             token = await twin.get_auth_token()
             from_date = await get_from_date(session, account.twin_login)
             if not from_date:
-                from_date = account.date_start.strftime("%Y-%m-%dT%H:00:00+00:00")
+                from_date = account.date_start
+
             await save_contacts(
                 twin=twin,
                 token=token,
@@ -47,5 +48,6 @@ async def receive_contacts_info(request: Request):
                 session=session,
                 from_=from_date,
                 fields_=account.fields,
+                bot_id=account.bot_id
             )
             await session.commit()

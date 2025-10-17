@@ -93,3 +93,4 @@ class AccountsSchema(BaseModel):
     twin_password: str
     fields: Dict[str, Any] | None
     date_start: date
+    bot_id: UUID | None = None
