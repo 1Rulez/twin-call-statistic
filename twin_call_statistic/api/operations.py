@@ -32,6 +32,7 @@ async def get_twin_repo(request: Request, login: str, password: str) -> TwinRepo
 
 @twin_operation_router.post("/receive_contacts")
 async def receive_contacts_info(request: Request):
+    """'Ручка' для сбора информации по аккаунтам"""
     async with get_session(request) as session:
         accounts = await get_twin_accounts(session)
 
@@ -65,7 +66,7 @@ async def receive_contacts_info(request: Request):
 
 @twin_operation_router.get("/last-updated")
 async def get_last_updated_time(request: Request):
-
+    """'Ручка' для получения информации в ТГ"""
     date_now = datetime.now() - timedelta(hours=3)
 
     async with get_session(request) as session:
