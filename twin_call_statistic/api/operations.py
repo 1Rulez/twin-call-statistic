@@ -1,10 +1,18 @@
+from datetime import datetime, timedelta
+
 from fastapi import APIRouter, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from twin_call_statistic.adapters.twin import TwinRepository
+from twin_call_statistic.adapters.telegram import Telegram
 from twin_call_statistic.api.schemas import AccountsSchema
 from twin_call_statistic.configuration import Request
-from twin_call_statistic.api.crud import get_twin_accounts, get_from_date, save_contacts
+from twin_call_statistic.api.crud import (
+    get_twin_accounts,
+    get_from_date,
+    save_contacts,
+    get_last_updated_project,
+)
 
 twin_operation_router = APIRouter()
 
@@ -35,7 +43,9 @@ async def receive_contacts_info(request: Request):
         accounts = [AccountsSchema(**acc) for acc in accounts]
 
         for account in accounts:
-            twin = await get_twin_repo(request, account.twin_login, account.twin_password)
+            twin = await get_twin_repo(
+                request, account.twin_login, account.twin_password
+            )
             token = await twin.get_auth_token()
             from_date = await get_from_date(session, account.twin_login)
             if not from_date:
@@ -48,6 +58,28 @@ async def receive_contacts_info(request: Request):
                 session=session,
                 from_=from_date,
                 fields_=account.fields,
-                bot_id=account.bot_id
+                bot_id=account.bot_id,
             )
             await session.commit()
+
+
+@twin_operation_router.get("/last-updated")
+async def get_last_updated_time(request: Request):
+
+    date_now = datetime.now() - timedelta(hours=3)
+
+    async with get_session(request) as session:
+        projects = await get_last_updated_project(session)
+
+        for project in projects:
+            pr_date: datetime = project.get("last_date") + timedelta(hours=3)
+            tg_token = project.get("tg_token")
+            tg_chat_id = project.get("tg_chat_id")
+            if 3 > date_now.hour < 23:
+                return
+            if pr_date.replace(tzinfo=None) > date_now:
+                continue
+
+            message = f"""❌ALERT❌ \nЗвонков по проекту {project.get("project")} нет уже 3 часа"""
+
+            await Telegram(tg_token, tg_chat_id).send_telegram_message(message)

@@ -2,13 +2,35 @@ from typing import Sequence
 from datetime import datetime, timedelta
 from uuid import UUID
 
-from sqlalchemy import select, desc, insert, RowMapping
+from sqlalchemy import select, desc, insert, RowMapping, func, and_
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from twin_call_statistic.adapters.twin import TwinRepository
 from twin_call_statistic.models import TwinProjects, CallInfo
 from twin_call_statistic.api.schemas import ContactSchema
+
+
+async def get_last_updated_project(session: AsyncSession) -> Sequence[RowMapping]:
+    stmt = (
+        select(
+            CallInfo.project,
+            TwinProjects.tg_token,
+            TwinProjects.tg_chat_id,
+            func.max(CallInfo.createdAt).label("last_date")
+        )
+        .join(TwinProjects, TwinProjects.twin_login == CallInfo.project)
+        .where(
+            and_(
+                TwinProjects.is_active,
+                TwinProjects.tg_token.isnot(None),
+                TwinProjects.tg_chat_id.isnot(None),
+            )
+        )
+        .group_by(CallInfo.project, TwinProjects.tg_token, TwinProjects.tg_chat_id)
+        .order_by(desc(func.max(CallInfo.createdAt)))
+    )
+    return (await session.execute(stmt)).mappings().all()
 
 
 async def get_twin_accounts(session: AsyncSession) -> Sequence[RowMapping]:

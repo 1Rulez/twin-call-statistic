@@ -56,3 +56,5 @@ class TwinProjects(Base):
     fields: Mapped[Dict[str, Any]] = mapped_column(JSON, nullable=True)
     date_start: Mapped[date] = mapped_column(DATE, nullable=False)
     bot_id: Mapped[UUID] = mapped_column(nullable=True)
+    tg_chat_id: Mapped[str] = mapped_column(String, nullable=True)
+    tg_token: Mapped[str] = mapped_column(String, nullable=True)
